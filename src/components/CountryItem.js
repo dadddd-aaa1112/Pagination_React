@@ -2,12 +2,10 @@ import React from 'react'
 
 const CountryItem = ({ name, flag }) => {
 	return (
-		<>
-			<li>
-				{name} &nbsp;
-				<img src={flag} style={{ width: '25px' }} />
-			</li>
-		</>
+		<li>
+			{name}
+			<img src={flag} alt="flag" style={{ width: '25px' }} />
+		</li>
 	)
 }
 

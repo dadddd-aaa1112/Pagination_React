@@ -1,60 +1,61 @@
-import React, { useState, useEffect } from 'react'
+import CountryList from './components/CountryList'
+import Pagination from './components/Pagination'
+import React, { useEffect, useState } from 'react'
+import { BallTriangle } from 'react-loader-spinner'
 import axios from 'axios'
-import CountryItem from './components/CountryItem'
 
 const BASE_URL = 'https://restcountries.com/v2/all'
-
 const App = () => {
 	const [countries, setCountries] = useState([])
 	const [load, setLoad] = useState(false)
-	const [countryOnPage] = useState(30)
-	const totalPage = Math.ceil(countries.length / countryOnPage)
-	const [currentPage, setCurrentPage] = useState(1)
-
-	const lastCountryIndex = currentPage * countryOnPage
-	const firstCountryIndex = lastCountryIndex - countryOnPage
-	const currentCountry = countries.slice(firstCountryIndex, lastCountryIndex)
-
-	const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
 	useEffect(() => {
 		setLoad(true)
 		axios.get(BASE_URL).then((resp) => {
-			const allCountries = resp.data
-			setCountries(allCountries)
+			const allCountry = resp.data
+			setCountries(allCountry)
 			setLoad(false)
 		})
 	}, [])
 
-	let countPage = []
+	const paginate = (page) => setCurrentPage(page)
 
-	for (let i = 1; i <= totalPage; i++) {
-		countPage.push(i)
+	const [currentPage, setCurrentPage] = useState(1)
+	const countryOnPage = 20
+	const countPage = Math.ceil(countries.length / countryOnPage)
+
+	const lastCountries = currentPage * countryOnPage
+	const firstCountries = lastCountries - countryOnPage
+	const currentCountries = countries.slice(firstCountries, lastCountries)
+
+	const prevPage = () => {
+		if (currentPage > 1) {
+			setCurrentPage((prev) => prev - 1)
+		} else {
+			setCurrentPage(1)
+		}
+	}
+
+	const nextPage = () => {
+		if (currentPage < countPage) {
+			setCurrentPage((prev) => prev + 1)
+		} else {
+			setCurrentPage(countPage)
+		}
 	}
 
 	return (
 		<>
-			<h3>Pagination</h3>
-			{load && <h3>loading...</h3>}
+			{load && <BallTriangle color="#00BFFF" height={80} width={80} />}
 			<ul>
-				{currentCountry.map((country, index) => (
-					<CountryItem key={index} {...country} />
-				))}
+				<CountryList countries={currentCountries} />
 			</ul>
-			{countPage.map((page) => (
-				<a href="#" key={page} onClick={() => paginate(page)}>
-					{page}&nbsp;
-				</a>
-			))}
-
-			<button onClick={() => setCurrentPage((prev) => prev - 1)}>
-				{' '}
-				Prev page
-			</button>
-			<button onClick={() => setCurrentPage((prev) => prev + 1)}>
-				{' '}
-				Next page
-			</button>
+			<Pagination
+				count={countPage}
+				changeCurrentPage={paginate}
+				nextPage={nextPage}
+				prevPage={prevPage}
+			/>
 		</>
 	)
 }
